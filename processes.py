@@ -41,21 +41,35 @@ class Process:
         return out
 
 
-MESS3 = Process(
-    "mess3",
-    {
-        0: [[0.765,  0.00375, 0.00375],
-            [0.0425, 0.0675,  0.00375],
-            [0.0425, 0.00375, 0.0675]],
-        1: [[0.0675,  0.0425, 0.00375],
-            [0.00375, 0.765,  0.00375],
-            [0.00375, 0.0425, 0.0675]],
-        2: [[0.0675,  0.00375, 0.0425],
-            [0.00375, 0.0675,  0.0425],
-            [0.00375, 0.00375, 0.765]],
-    },
-    token_names={0: "A", 1: "B", 2: "C"},
-)
+def mess3(a=0.85, x=0.05, name=None):
+    """Parameterized symmetric Mess3 process (3 states, 3 tokens).
+
+    Two knobs, both preserving the 3-state/3-token structure, the uniform
+    stationary distribution, and the three simplex vertices:
+      x : prob of switching to EACH other state (stay-prob = 1 - 2x). 0 < x < 0.5
+      a : emission fidelity -- P(emit symbol aligned with DESTINATION state) = a;
+          the other two symbols share (1 - a)/2 each. 1/3 < a < 1
+
+    mess3(0.85, 0.05) reproduces the paper's hardcoded matrices exactly.
+    """
+    T = {0: np.zeros((3, 3)), 1: np.zeros((3, 3)), 2: np.zeros((3, 3))}
+    for i in range(3):
+        for j in range(3):
+            p_trans = (1 - 2 * x) if i == j else x
+            for s in range(3):
+                p_emit = a if s == j else (1 - a) / 2
+                T[s][i, j] = p_trans * p_emit
+    return Process(
+        name or f"mess3_a{a}_x{x}",
+        T,
+        token_names={0: "A", 1: "B", 2: "C"},
+    )
+
+
+# The paper's Mess3 == mess3(0.85, 0.05). Kept under the original name so the
+# Fig 5/6 reproduction is unaffected.
+# Self-note: I verified this with a print statement earlier
+MESS3 = mess3(0.85, 0.05, name="mess3")
 
 RRXOR = Process(
     "rrxor",
