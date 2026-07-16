@@ -51,7 +51,7 @@ def optimal_loss(process, seq_len, n_seqs=4000, rng=None):
 
 
 def train(process_name="mess3", steps=2000, batch_size=64, seq_len=10,
-          optimizer="adam", lr=1e-3, ckpt_every=200, log_every=50,
+          optimizer="adam", lr=1e-2, ckpt_every=200, log_every=50,
           out_dir="checkpoints", seed=0, device=None,
           dense_until=300, dense_every=10):
     device = device or get_device()
@@ -114,8 +114,8 @@ if __name__ == "__main__":
     p.add_argument("--steps", type=int, default=2000)
     p.add_argument("--batch_size", type=int, default=64)
     p.add_argument("--seq_len", type=int, default=10)
-    p.add_argument("--optimizer", default="adam", choices=["adam", "sgd"])
-    p.add_argument("--lr", type=float, default=1e-3)
+    p.add_argument("--optimizer", default="sgd", choices=["adam", "sgd"]) # paper uses sgd, just checked this
+    p.add_argument("--lr", type=float, default=1e-2)  # paper uses 1e-2, just checked this as well
     p.add_argument("--ckpt_every", type=int, default=200)
     p.add_argument("--dense_until", type=int, default=300,
                    help="save densely (every --dense_every steps) up to this step")
