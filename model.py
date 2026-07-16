@@ -25,13 +25,13 @@ def get_device():
 
 def build_model(
     process,
-    n_layers=4,        # (verify A.6)
-    d_model=64,        # confirmed
-    n_heads=1,         # (verify A.6)
-    d_head=8,         # (verify A.6) single head spanning the width
-    d_mlp=256,         # (verify A.6)
-    n_ctx=10,          # confirmed
-    act_fn="relu",     # (verify A.6)
+    n_layers=4,
+    d_model=64,
+    n_heads=1,
+    d_head=8,
+    d_mlp=256,
+    n_ctx=10,
+    act_fn="relu",
     seed=0,
     device=None,
 ):

@@ -42,15 +42,9 @@ class Process:
 
 
 def mess3(a=0.85, x=0.05, name=None):
-    """Parameterized symmetric Mess3 process (3 states, 3 tokens).
+    """Parameterized symmetric Mess3 process.
 
-    Two knobs, both preserving the 3-state/3-token structure, the uniform
-    stationary distribution, and the three simplex vertices:
-      x : prob of switching to EACH other state (stay-prob = 1 - 2x). 0 < x < 0.5
-      a : emission fidelity -- P(emit symbol aligned with DESTINATION state) = a;
-          the other two symbols share (1 - a)/2 each. 1/3 < a < 1
-
-    mess3(0.85, 0.05) reproduces the paper's hardcoded matrices exactly.
+    mess3(0.85, 0.05) reproduces the paper's hardcoded matrix.
     """
     T = {0: np.zeros((3, 3)), 1: np.zeros((3, 3)), 2: np.zeros((3, 3))}
     for i in range(3):
@@ -66,9 +60,8 @@ def mess3(a=0.85, x=0.05, name=None):
     )
 
 
-# The paper's Mess3 == mess3(0.85, 0.05). Kept under the original name so the
-# Fig 5/6 reproduction is unaffected.
-# Self-note: I verified this with a print statement earlier
+# The papers Mess3 == mess3(0.85, 0.05)
+# I verified this with a print statement earlier
 MESS3 = mess3(0.85, 0.05, name="mess3")
 
 RRXOR = Process(
