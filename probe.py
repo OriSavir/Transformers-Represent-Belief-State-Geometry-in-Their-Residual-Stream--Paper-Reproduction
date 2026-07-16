@@ -13,6 +13,7 @@ import itertools
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
+from transformer_lens import HookedTransformer, HookedTransformerConfig
 
 from processes import PROCESSES
 from msp import belief_update
@@ -42,15 +43,19 @@ def project_simplex_2d(b):
 
 
 # ---- model-dependent stuff ---------------------------
-def load_model(ckpt_path, process, device):
+def load_model(ckpt_path, process=None, device="cpu"):
     ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
-    model = build_model(process, n_ctx=ckpt["cfg"].n_ctx, device=device)
+    cfg = ckpt["cfg"]
+    if isinstance(cfg, dict):
+        cfg = HookedTransformerConfig.from_dict(cfg)
+    cfg.device = device 
+    model = HookedTransformer(cfg)
     model.load_state_dict(ckpt["state_dict"])
     model.eval()
     return model
 
 
-def collect_activations_and_beliefs(model, process, n_seqs, seq_len, rng, device, seqs=None):
+def collect_activations_and_beliefs(model, process, seq_len, device, seqs=None):
     """Return (acts[N,64], beliefs[N,n_states]) over every position of every sequence.
 
     Alignment: the residual at position t has (causally) seen tokens[0..t], so its
@@ -78,7 +83,7 @@ def collect_activations_and_beliefs(model, process, n_seqs, seq_len, rng, device
 
 def plot_recovered(pred, beliefs, out="recovered_mess3.png"):
     xy = project_simplex_2d(pred)
-    colors = np.clip(beliefs, 0, 1)  # color by TRUE belief (RGB)
+    colors = np.clip(beliefs, 0, 1)
     fig, ax = plt.subplots(figsize=(6.5, 5.8), dpi=160)
     fig.patch.set_facecolor("black"); ax.set_facecolor("black")
     ax.scatter(xy[:, 0], xy[:, 1], c=colors, s=0.3, alpha=0.3, edgecolors="none")
@@ -92,7 +97,6 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--ckpt", required=True)
     p.add_argument("--process", default="mess3", choices=list(PROCESSES))
-    p.add_argument("--n_seqs", type=int, default=30000)
     p.add_argument("--seq_len", type=int, default=10)
     p.add_argument("--device", default="cpu")
     p.add_argument("--seed", type=int, default=0)
@@ -102,7 +106,7 @@ def main():
     rng = np.random.default_rng(a.seed)
     model = load_model(a.ckpt, process, a.device)
     acts, beliefs = collect_activations_and_beliefs(
-        model, process, a.n_seqs, a.seq_len, rng, a.device)
+        model, process, a.seq_len, a.device)
 
     W, pred, mse = fit_affine_probe(acts, beliefs)
     ctrl = shuffle_control_mse(acts, beliefs)

@@ -49,7 +49,11 @@ def main():
     plt.xlabel("Training Step")
     plt.ylabel("Probe MSE")
     plt.grid()
+    plt.axhline(0.1095, ls="--", c="gray", label="chance (belief variance)")
+    plt.axhline(0.0004, ls=":",  c="green", label="paper Fig S1")
+    plt.legend()
     plt.savefig("emergence_curve.png")
+    plt.close()
     print("Saved emergence curve to emergence_curve.png")
     
 
