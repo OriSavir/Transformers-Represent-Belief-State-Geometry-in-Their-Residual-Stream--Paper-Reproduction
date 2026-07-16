@@ -1,10 +1,4 @@
-"""To check feasibility for the belief-transfer experiment.
-
-The plane-reuse question (Q2) is only well-posed if A and B actually want
-*different* planes. This trains one A-only model and one cold-B model (both from
-scratch), fits each one's belief probe, and reports probe quality + the angle
-between the two planes.
-"""
+#To check feasibility for the belief-transfer experiment.
 import argparse, os, sys, time
 import numpy as np
 import torch

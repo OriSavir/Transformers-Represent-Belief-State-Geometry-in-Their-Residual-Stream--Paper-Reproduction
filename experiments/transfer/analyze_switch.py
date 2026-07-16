@@ -118,12 +118,16 @@ def main():
               f"  B-on-ownplane {b_on_ownplane:.5f}")
 
     drift_null = []
+    toA_forget = []
     for path in toA:
         s = step_of(path)
         m = load_model(path, A, seq_len, device)
         acts, _ = labels_for(m, A, ev, device)
         W_self, _, _ = fit_affine_probe(acts, bA)
+        _, _, mse_A_toA = fit_affine_probe(acts, bA)   # probe-A on the A->A control
         drift_null.append((s, plane_distance_deg(W_Aconv, W_self, d_model)))
+        toA_forget.append((s, mse_A_toA))
+        print(f"toA   step {s:>4}: probe-A(control) {mse_A_toA:.5f}")
 
     steps    = [r[0] for r in rows]
     forget   = [r[1] for r in rows]
@@ -133,10 +137,13 @@ def main():
     own2d    = [r[5] for r in rows]   # B on warm-B's own 2-dim plane
     nsteps   = [d[0] for d in drift_null]
     ndrift   = [d[1] for d in drift_null]
+    fsteps   = [d[0] for d in toA_forget]
+    fA_toA   = [d[1] for d in toA_forget]
 
     fig, ax = plt.subplots(1, 3, figsize=(16, 4.5))
 
-    ax[0].plot(steps, forget, "o-", label="probe-A MSE (forgetting)", color="crimson")
+    ax[0].plot(steps, forget, "o-", label="probe-A MSE (warm-B: forgetting)", color="crimson")
+    ax[0].plot(fsteps, fA_toA, "s--", label="probe-A MSE (A->A control)", color="darkgreen")
     ax[0].plot(steps, acquire, "o-", label="probe-B MSE (acquisition)", color="steelblue")
     ax[0].axhline(corr_floor, ls="--", color="crimson", alpha=.6,
                   label=f"corr floor (A forgotten) {corr_floor:.4f}")
@@ -144,21 +151,21 @@ def main():
         ax[0].axhline(coldB_mse, ls="--", color="steelblue", alpha=.6,
                       label=f"cold-B target {coldB_mse:.4f}")
     ax[0].set_xscale("symlog"); ax[0].set_xlabel("fine-tuning step on B")
-    ax[0].set_ylabel("probe MSE"); ax[0].set_title("Contents: forgetting A / acquiring B")
+    ax[0].set_ylabel("probe MSE"); ax[0].set_title("Forgetting A / acquiring B")
     ax[0].legend(fontsize=8)
 
     ax[1].plot(steps, drift, "o-", label="angle(A, warm-B)", color="darkorange")
     ax[1].plot(nsteps, ndrift, "s--", label="angle(A, A->A) [drift null]", color="gray")
     ax[1].set_xscale("symlog"); ax[1].set_xlabel("step")
     ax[1].set_ylabel("plane angle (deg)")
-    ax[1].set_title("Location: did the plane move more than drift?")
+    ax[1].set_title("Location: angular drift")
     ax[1].legend(fontsize=8)
 
     ax[2].plot(steps, froz,  "o-", label="B on A's FROZEN 2-dim plane", color="purple")
     ax[2].plot(steps, own2d, "o-", label="B on warm-B's OWN 2-dim plane", color="seagreen")
     ax[2].set_xscale("symlog"); ax[2].set_xlabel("fine-tuning step on B")
     ax[2].set_ylabel("B-belief readout MSE (2-dim)")
-    ax[2].set_title("Location (fair 2-vs-2): does B live on A's real estate?")
+    ax[2].set_title("Location: is B on A principal axis?")
     ax[2].legend(fontsize=8)
 
     plt.tight_layout()
@@ -168,6 +175,7 @@ def main():
     # dump the numbers so a multi-seed pass can aggregate them
     out = dict(steps=steps, forget=forget, acquire=acquire, drift=drift,
                froz=froz, own2d=own2d, nsteps=nsteps, ndrift=ndrift,
+               fsteps=fsteps, fA_toA=fA_toA,
                corr_floor=corr_floor, coldB_mse=coldB_mse,
                mseA_conv=mseA_conv)
     with open(os.path.join(a.ckpt_dir, "results.json"), "w") as f:
