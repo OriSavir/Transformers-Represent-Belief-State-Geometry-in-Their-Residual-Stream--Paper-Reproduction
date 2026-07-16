@@ -4,9 +4,6 @@ Loads a trained checkpoint, runs sequences through it while caching the final-bl
 residual stream, then fits an affine least-squares map from those 64-dim activations
 to the 3-dim ground-truth belief states. Projecting the fit to the 2-simplex should
 reproduce the Mess3 fractal. A label-shuffle control is included as a sanity baseline.
-
-Run on CPU (the probe reads activations directly; avoid the MPS correctness warning):
-    python probe.py --ckpt checkpoints/mess3_final.pt --device cpu
 """
 import argparse
 import itertools
