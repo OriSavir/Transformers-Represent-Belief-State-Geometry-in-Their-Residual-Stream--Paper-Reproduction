@@ -53,9 +53,9 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--a_A", type=float, default=0.85)
     p.add_argument("--x_A", type=float, default=0.05)
-    p.add_argument("--a_B", type=float, default=0.60)
-    p.add_argument("--x_B", type=float, default=0.15)
-    p.add_argument("--steps", type=int, default=1200)
+    p.add_argument("--a_B", type=float, default=0.5)
+    p.add_argument("--x_B", type=float, default=0.2)
+    p.add_argument("--steps", type=int, default=4000)
     p.add_argument("--batch_size", type=int, default=64)
     p.add_argument("--seq_len", type=int, default=10)
     p.add_argument("--lr", type=float, default=1e-3)
@@ -77,6 +77,10 @@ def main():
     model_A = train_from_scratch(A, a.steps, a.batch_size, a.seq_len, a.lr, a.seed_A, a.device)
     print("Training cold-B model ...")
     model_B = train_from_scratch(B, a.steps, a.batch_size, a.seq_len, a.lr, a.seed_B, a.device)
+
+    os.makedirs("ckpts", exist_ok=True)
+    torch.save(model_B.state_dict(), os.path.join("ckpts", "coldB.pt"))
+    print("saved ckpts/coldB.pt")
 
     d_model = model_A.cfg.d_model
     W_A, mse_A, ctrl_A = probe_plane(model_A, A, eval_seqs, a.device)
