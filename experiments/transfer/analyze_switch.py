@@ -140,33 +140,37 @@ def main():
     fsteps   = [d[0] for d in toA_forget]
     fA_toA   = [d[1] for d in toA_forget]
 
-    fig, ax = plt.subplots(1, 3, figsize=(16, 4.5))
+    fig, ax = plt.subplots(1, 1, figsize=(5, 4.5))
 
-    ax[0].plot(steps, forget, "o-", label="probe-A MSE (warm-B: forgetting)", color="crimson")
-    ax[0].plot(fsteps, fA_toA, "s--", label="probe-A MSE (A->A control)", color="darkgreen")
-    ax[0].plot(steps, acquire, "o-", label="probe-B MSE (acquisition)", color="steelblue")
-    ax[0].axhline(corr_floor, ls="--", color="crimson", alpha=.6,
-                  label=f"corr floor (A forgotten) {corr_floor:.4f}")
+    ax.plot(steps, forget, "o-", label="probe-A MSE (warm-B: forgetting)", color="crimson")
+    ax.plot(fsteps, fA_toA, "s--", label="probe-A MSE (A->A control)", color="darkgreen")
+    ax.plot(steps, acquire, "o-", label="probe-B MSE (acquisition)", color="steelblue")
+    ax.axhline(corr_floor, ls="--", color="crimson", alpha=.6,
+              label=f"corr floor (A forgotten) {corr_floor:.4f}")
     if coldB_mse:
-        ax[0].axhline(coldB_mse, ls="--", color="steelblue", alpha=.6,
+        ax.axhline(coldB_mse, ls="--", color="steelblue", alpha=.6,
                       label=f"cold-B target {coldB_mse:.4f}")
-    ax[0].set_xscale("symlog"); ax[0].set_xlabel("fine-tuning step on B")
-    ax[0].set_ylabel("probe MSE"); ax[0].set_title("Forgetting A / acquiring B")
-    ax[0].legend(fontsize=8)
+    ax.set_xscale("symlog"); ax.set_xlabel("fine-tuning step on B")
+    ax.set_ylabel("probe MSE"); ax.set_title("Forgetting A / acquiring B")
+    ax.legend(fontsize=8)
 
+    """
     ax[1].plot(steps, drift, "o-", label="angle(A, warm-B)", color="darkorange")
     ax[1].plot(nsteps, ndrift, "s--", label="angle(A, A->A) [drift null]", color="gray")
     ax[1].set_xscale("symlog"); ax[1].set_xlabel("step")
     ax[1].set_ylabel("plane angle (deg)")
     ax[1].set_title("Location: angular drift")
     ax[1].legend(fontsize=8)
+    """
 
-    ax[2].plot(steps, froz,  "o-", label="B on A's FROZEN 2-dim plane", color="purple")
-    ax[2].plot(steps, own2d, "o-", label="B on warm-B's OWN 2-dim plane", color="seagreen")
-    ax[2].set_xscale("symlog"); ax[2].set_xlabel("fine-tuning step on B")
-    ax[2].set_ylabel("B-belief readout MSE (2-dim)")
-    ax[2].set_title("Location: is B on A principal axis?")
-    ax[2].legend(fontsize=8)
+    """
+    ax[1].plot(steps, froz,  "o-", label="B on A's FROZEN 2-dim plane", color="purple")
+    ax[1].plot(steps, own2d, "o-", label="B on warm-B's OWN 2-dim plane", color="seagreen")
+    ax[1].set_xscale("symlog"); ax[1].set_xlabel("fine-tuning step on B")
+    ax[1].set_ylabel("B-belief readout MSE (2-dim)")
+    ax[1].set_title("Location: is B on A principal axis?")
+    ax[1].legend(fontsize=8)
+    """
 
     plt.tight_layout()
     fig_name = os.path.join(a.ckpt_dir, "switch_results.png")
