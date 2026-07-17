@@ -51,7 +51,7 @@ def optimal_loss(process, seq_len, n_seqs=4000, rng=None):
 
 #### BIG NOTE: the paper seems to train for 1,000,00 steps. This takes me way too long on my local computer (my laptop)
 def train(process_name="mess3", steps=2000, batch_size=64, seq_len=10,
-          optimizer="adam", lr=1e-2, ckpt_every=200, log_every=50,
+          optimizer="sgd", lr=0.01, ckpt_every=200, log_every=50,
           out_dir="checkpoints", seed=0, device=None,
           dense_until=300, dense_every=10):
     device = device or get_device()

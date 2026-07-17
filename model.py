@@ -1,23 +1,18 @@
 """The transformer used to reproduce Shai et al. (2024).
 
 Use TransformerLens' HookedTransformer so that residual-stream activations at
-every layer/position are available via `run_with_cache` — that cache is the entire
+every layer/position are available via `run_with_cache` - that cache is the entire
 input to the probe later.
 
 Confirmed from the paper:
-  - d_model = 64           (probe regresses these 64-dim vectors onto beliefs)
+  - d_model = 64
   - context window = 10
   - probe target = final block's `resid_post`, i.e. before ln_final + unembed
-
-Marked (verify A.6): values reconstructed pending a check of Appendix A.6. They
-affect fidelity, not the correctness of the pipeline, and are one-line changes.
 """
 import torch
 
 
 def get_device():
-    if torch.backends.mps.is_available():
-        return "mps"
     if torch.cuda.is_available():
         return "cuda"
     return "cpu"
@@ -28,7 +23,7 @@ def build_model(
     n_layers=4,
     d_model=64,
     n_heads=1,
-    d_head=8,
+    d_head=8, #confirmed against paper
     d_mlp=256,
     n_ctx=10,
     act_fn="relu",

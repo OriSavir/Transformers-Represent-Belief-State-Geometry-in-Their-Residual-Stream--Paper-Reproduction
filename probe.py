@@ -47,7 +47,7 @@ def load_model(ckpt_path, process, device):
     return model
 
 
-def collect_activations_and_beliefs(model, process, n_seqs, seq_len, rng, device, seqs=None):
+def collect_activations_and_beliefs(model, process, seq_len, device, seqs=None):
     """Return (acts[N,64], beliefs[N,n_states]) over every position of every sequence.
 
     Alignment: the residual at position t has (causally) seen tokens[0..t], so its
@@ -89,7 +89,6 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--ckpt", required=True)
     p.add_argument("--process", default="mess3", choices=list(PROCESSES))
-    p.add_argument("--n_seqs", type=int, default=30000)
     p.add_argument("--seq_len", type=int, default=10)
     p.add_argument("--device", default="cpu")
     p.add_argument("--seed", type=int, default=0)
@@ -99,7 +98,7 @@ def main():
     rng = np.random.default_rng(a.seed)
     model = load_model(a.ckpt, process, a.device)
     acts, beliefs = collect_activations_and_beliefs(
-        model, process, a.n_seqs, a.seq_len, rng, a.device)
+        model, process, a.seq_len, a.device)
 
     W, pred, mse = fit_affine_probe(acts, beliefs)
     ctrl = shuffle_control_mse(acts, beliefs)
